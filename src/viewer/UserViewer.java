@@ -12,6 +12,9 @@ public class UserViewer {
 	private MovieViewer movieViewer;
 	private TheaterViewer theaterViewer;
 	private ReservationViewer reservationViewer;
+	private ReviewViewer reviewViewer;
+	private ScreenViewer screenViewer;
+	private PlayInfoViewer playInfoViewer;
 
 	public UserViewer(Scanner sc) {
 		userController = new UserController();
@@ -29,6 +32,15 @@ public class UserViewer {
 	public void setReservationViewer(ReservationViewer reservationViewer) {
 		this.reservationViewer = reservationViewer;
 	}
+	public void setReviewViewer(ReviewViewer reviewViewer) {
+		this.reviewViewer=reviewViewer;
+	}
+	public void setScreenViewer(ScreenViewer screenViewer) {
+		this.screenViewer=screenViewer;
+	}
+	public void setPlayInfoViewer(PlayInfoViewer playInfoViewer) {
+		this.playInfoViewer=playInfoViewer;
+	}
 
 	// 초기화면 메소드
 	public void showIndex() {
@@ -42,6 +54,12 @@ public class UserViewer {
 				login();
 				if (logInInfo != null) {
 					System.out.println("로그인 되었습니다.");
+					movieViewer.setLogIn(logInInfo);
+					theaterViewer.setLogIn(logInInfo);
+					reviewViewer.setLogIn(logInInfo);
+					screenViewer.setLogIn(logInInfo);
+					reservationViewer.setLogIn(logInInfo);
+					playInfoViewer.setLogIn(logInInfo);
 					showMenu();
 				}
 			} else if (userChoice == 2) {
@@ -60,11 +78,13 @@ public class UserViewer {
 		temp.setNickname("guest");
 		temp.setGrade(1);
 		userController.insert(new UserDTO(temp));
+		
 		temp.setUsername("guest1");
 		temp.setPassword("guest1");
 		temp.setNickname("guest1");
 		temp.setGrade(2);
 		userController.insert(new UserDTO(temp));
+		
 		for (int i = 1; i < 4; i++) {
 			temp.setUsername("admin" + i);
 			temp.setPassword(i + "qwer");
@@ -79,9 +99,9 @@ public class UserViewer {
 		while (logInInfo != null) {
 			int userChoice;
 			if (logInInfo.getGrade() == 3) {
-				userChoice = ScUtil.nextInt(sc, 1, 7, "1.영화목록보기 2.극장목록보기 3.영화예매 4.로그아웃 5.영화정보 등록하기(관) 6.극장정보 등록하기(관) 7.회원등급수정(관)");
+				userChoice = ScUtil.nextInt(sc, 1, 6, "1.영화목록보기 2.극장목록보기 3.로그아웃 4.영화정보 등록하기(관) 5.극장정보 등록하기(관) 6.회원등급수정(관)");
 			} else {
-				userChoice = ScUtil.nextInt(sc, 1, 4, "1.영화목록보기 2.극장목록보기 3.영화예매 4.로그아웃");
+				userChoice = ScUtil.nextInt(sc, 1, 5, "1.영화목록보기 2.극장목록보기 3.영화예매 4.영화예매취소 5.로그아웃");
 			}
 
 			if (userChoice == 1) {
@@ -91,22 +111,29 @@ public class UserViewer {
 				theaterViewer.setLogIn(logInInfo);
 				theaterViewer.printList();
 			} else if (userChoice == 3) {
-				reservationViewer.setLogIn(logInInfo);
-//				reservationViewer.reservationMenu();
+				if(logInInfo.getGrade()==3) {
+					logInInfo = null;
+				}else {
+					reservationViewer.setLogIn(logInInfo);
+					reservationViewer.reservationMenu();
+				}
+			} else if (userChoice==4) {
+				if(logInInfo.getGrade()==3) {
+					movieViewer.setLogIn(logInInfo);
+					movieViewer.addMovie();
+				} else {
+					reservationViewer.setLogIn(logInInfo);
+					reservationViewer.cancelTicket();
+				}
 			} else if (userChoice == 5) {
-				movieViewer.setLogIn(logInInfo);
-				movieViewer.addMovie();
+				if(logInInfo.getGrade()==3) {
+					theaterViewer.setLogIn(logInInfo);
+					theaterViewer.addTheater();
+				} else {
+					logInInfo=null;
+				}
 			} else if(userChoice==6) {
-				theaterViewer.setLogIn(logInInfo);
-				theaterViewer.addTheater();
-			} else if(userChoice==7) {
-//				userGradeUpdate();
-			}
-			
-			
-			
-			else {
-				logInInfo = null;
+				userGradeUpdate();
 			}
 		}
 	}
@@ -174,12 +201,47 @@ public class UserViewer {
 				printOne(id);
 			}
 			System.out.println("-------------------------------------------------");
+			updateGradeToCritic();
+			
 		} else if(userChoice==2) {
 			System.out.println("-------------------------------------------------");
 			for(int id:userController.getCriticIdList()) {
 				printOne(id);
 			}
 			System.out.println("-------------------------------------------------");
+			updateGradeToPublic();
+		}
+	}
+	public void updateGradeToCritic() {
+		int changeChoice=ScUtil.nextInt(sc, "전문평론가로 등급변경할 회원코드를 입력하시거나 0을눌러 뒤로가기");
+		UserDTO u=userController.selectOne(changeChoice);
+		
+		while(changeChoice!=0&&(u==null||u.getGrade()!=1)) {
+			System.out.println("잘못된 입력입니다. 다시 입력해주세요");
+			changeChoice=ScUtil.nextInt(sc, "전문평론가로 등급변경할 회원코드를 입력하시거나 0을눌러 뒤로가기");
+		}
+		if(changeChoice!=0) {
+			UserDTO temp=userController.selectOne(changeChoice);
+			temp.setGrade(2);
+			
+			userController.update(temp);
+			System.out.println("등급변경이 완료되었습니다.");
+		}
+	}
+	public void updateGradeToPublic() {
+		int changeChoice=ScUtil.nextInt(sc, "일반관람객으로 등급변경할 회원코드를 입력하시거나 0을눌러 뒤로가기");
+		UserDTO u=userController.selectOne(changeChoice);
+		
+		while(changeChoice!=0&&(u==null||u.getGrade()!=2)) {
+			System.out.println("잘못된 입력입니다. 다시 입력해주세요");
+			changeChoice=ScUtil.nextInt(sc, "일반관람객으로 등급변경할 회원코드를 입력하시거나 0을눌러 뒤로가기");
+		}
+		if(changeChoice!=0) {
+			UserDTO temp=userController.selectOne(changeChoice);
+			temp.setGrade(1);
+			
+			userController.update(temp);
+			System.out.println("등급변경이 완료되었습니다.");
 		}
 	}
 	public void printOne(int id) {

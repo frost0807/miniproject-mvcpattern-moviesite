@@ -96,7 +96,7 @@ public class MovieViewer {
 			}
 		} else if(userChoice==4) {
 			if(logInInfo.getGrade()!=3) {
-//				reservationViewer.pickMovieFirst(movieChoice);
+				reservationViewer.pickTheaterWithMovieId(movieId);
 			}
 		}
 	}
@@ -143,6 +143,28 @@ public class MovieViewer {
 		System.out.println("현재 상영중인 영화의 목록을 출력합니다.");
 		for(MovieDTO m:movieController.selectAll()) {
 			System.out.printf("영화코드:%d 영화제목:%s\n",m.getId(),m.getTitle());
+		}
+	}
+	public void printMovieListDetail() {
+		System.out.println("현재 상영중인 영화의 목록을 출력합니다.");
+		System.out.println("-------------------------------------------------");
+		for(MovieDTO m:movieController.selectAll()) {
+			System.out.printf("영화코드:%d 영화제목:%s 등급:%s 평점:",
+					m.getId(),m.getTitle(),filmRateString(m.getFilmrate()));
+			reviewViewer.printAverageScoreOfAll(m.getId());
+			System.out.println();
+		}
+		System.out.println("-------------------------------------------------");
+	}
+	public void checkValidMovie(int movieChoice) {
+		MovieDTO m=movieController.selectOne(movieChoice);
+		
+		while(movieChoice!=0&&m==null) {
+			System.out.println("잘못된 입력입니다.");
+			movieChoice=ScUtil.nextInt(sc, "예매하고싶은 영화코드를 입력하거나 0을입력해 뒤로가기");
+		}
+		if(movieChoice!=0) {
+			reservationViewer.pickTheaterWithMovieId(movieChoice);
 		}
 	}
 }

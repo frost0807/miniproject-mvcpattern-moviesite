@@ -24,6 +24,9 @@ public class SiteMain {
 		userViewer.setMovieViewer(movieViewer);
 		userViewer.setTheaterViewer(theaterViewer);
 		userViewer.setReservationViewer(reservationViewer);
+		userViewer.setPlayInfoViewer(playInfoViewer);
+		userViewer.setReviewViewer(reviewViewer);
+		userViewer.setScreenViewer(screenViewer);
 		
 		movieViewer.setReviewViewer(reviewViewer);
 		movieViewer.setReservationViewer(reservationViewer);
@@ -36,8 +39,15 @@ public class SiteMain {
 		
 		screenViewer.setMovieViewer(movieViewer);
 		screenViewer.setPlayInfoViewer(playInfoViewer);
+		screenViewer.setTheaterViewer(theaterViewer);
 		
 		playInfoViewer.setMovieViewer(movieViewer);
+		playInfoViewer.setReservationViewer(reservationViewer);
+		playInfoViewer.setTheaterViewer(theaterViewer);
+		
+		reservationViewer.setMovieViewer(movieViewer);
+		reservationViewer.setTheaterViewer(theaterViewer);
+		reservationViewer.setPlayInfoViewer(playInfoViewer);
 		
 		userViewer.showIndex();
 	}

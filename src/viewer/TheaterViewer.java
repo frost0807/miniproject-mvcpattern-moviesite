@@ -95,7 +95,7 @@ public class TheaterViewer {
 		} else {
 			int userChoice=ScUtil.nextInt(sc, 0, 1, "이 극장에서 예매하려면 1을 입력하거나 0을눌러 뒤로가기");
 			if(userChoice==1) {
-//				ReservationViewer.pickTheaterFirst(theaterId);
+//				ReservationViewer.pickTheaterFirstWithId(theaterId);
 			}
 		}
 	}
@@ -124,5 +124,26 @@ public class TheaterViewer {
 		
 		theaterController.update(temp);
 		System.out.println("극장정보 수정이 완료되었습니다.");
+	}
+	public void printTheaterListWithMovieId(int movieId) {
+		System.out.println("-------------------------------------------------");
+		for(TheaterDTO t:theaterController.selectAll()) {
+			System.out.printf("극장코드:%d 지점명:%s 극장명:%s\n",t.getId(),t.getBranch(),t.getName());
+		}
+		System.out.println("-------------------------------------------------");
+	}
+	public void checkValidTheaterWithTwoId(int movieId,int theaterChoice) {
+		TheaterDTO t=theaterController.selectOne(theaterChoice);
+		
+		while(theaterChoice!=0&&t==null) {
+			System.out.println("잘못된 입력입니다.");
+			theaterChoice=ScUtil.nextInt(sc, "예매할 극장코드를 입력하거나 0을입력해 뒤로가기");
+		}
+		if(theaterChoice!=0) {
+			screenViewer.reservationPickPlayInfo(movieId, theaterChoice);
+		}
+	}
+	public void printTheaterIdToName(int theaterId) {
+		System.out.print(theaterController.selectOne(theaterId).getName());
 	}
 }

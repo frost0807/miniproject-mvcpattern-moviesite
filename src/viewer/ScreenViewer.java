@@ -13,6 +13,7 @@ public class ScreenViewer {
 	private UserDTO logInInfo;
 	private ScreenController screenController;
 	private MovieViewer movieViewer;
+	private TheaterViewer theaterViewer;
 	private PlayInfoViewer playInfoViewer;
 	
 	public ScreenViewer(Scanner sc) {
@@ -21,6 +22,9 @@ public class ScreenViewer {
 	}
 	public void setMovieViewer(MovieViewer movieViewer) {
 		this.movieViewer=movieViewer;
+	}
+	public void setTheaterViewer(TheaterViewer theaterViewer) {
+		this.theaterViewer=theaterViewer;
 	}
 	public void setPlayInfoViewer(PlayInfoViewer playInfoViewer) {
 		this.playInfoViewer=playInfoViewer;
@@ -36,6 +40,24 @@ public class ScreenViewer {
 					s.getId(),screenController.screenTypeString(s.getScreenType()));
 			playInfoViewer.printList(s.getId());
 		}
+	}
+	public void reservationPickPlayInfo(int movieId,int theaterId) {
+		System.out.print("[선택영화:");
+		movieViewer.printMovieIdToTitle(movieId);
+		System.out.print("] [선택극장:");
+		theaterViewer.printTheaterIdToName(theaterId);
+		System.out.print("]\n");
+		printListWithTwoId(movieId,theaterId);
+	}
+	public void printListWithTwoId(int movieId,int theaterId) {
+		for(ScreenDTO s:screenController.selectAll()) {
+			if(s.getTheaterId()==theaterId) {
+				System.out.printf("[상영관코드:%d 상영관타입:%s]\n",s.getId(),screenController.screenTypeString(s.getScreenType()));
+				playInfoViewer.playInfoViewerWithTwoId(movieId,s.getId());
+			}
+		}
+		playInfoViewer.pickPlayInfo(movieId, theaterId);
+		
 	}
 	public void addScreen(int theaterId) {
 		ScreenDTO temp=new ScreenDTO();

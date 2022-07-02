@@ -6,20 +6,29 @@ import java.util.ArrayList;
 import model.UserDTO;
 import util.ScUtil;
 import model.PlayInfoDTO;
+import model.ReservationDTO;
 import controller.PlayInfoController;
 
 public class PlayInfoViewer {
 	private Scanner sc;
 	private UserDTO logInInfo;
 	private MovieViewer movieViewer;
+	private ReservationViewer reservationViewer;
 	private PlayInfoController playInfoController;
+	private TheaterViewer theaterViewer;
 
 	public PlayInfoViewer(Scanner sc) {
 		playInfoController=new PlayInfoController();
 		this.sc=sc;
 	}
+	public void setTheaterViewer(TheaterViewer theaterViewer) {
+		this.theaterViewer=theaterViewer;
+	}
 	public void setMovieViewer(MovieViewer movieViewer) {
 		this.movieViewer=movieViewer;
+	}
+	public void setReservationViewer(ReservationViewer reservationViewer) {
+		this.reservationViewer=reservationViewer;
 	}
 	public void setLogIn(UserDTO logInInfo) {
 		this.logInInfo=logInInfo;
@@ -27,7 +36,7 @@ public class PlayInfoViewer {
 	public void printList(int screenId) {
 		//상영영화 시작시간 잔여좌석
 		for(PlayInfoDTO p:playInfoController.selectAllByScreenId(screenId)) {
-			System.out.print("상영영화:");
+			System.out.printf("상영정보코드:%d 상영영화:",p.getId());
 			movieViewer.printMovieIdToTitle(p.getMovieId());
 			System.out.printf(" 시작시간:%s 잔여좌석:%d\n",p.getstartTime(),p.getSeatLeft());
 		}
@@ -116,5 +125,56 @@ public class PlayInfoViewer {
 		} else {}
 		//userChoice는 해당극장의 상영관 중 하나이다. userChoice가 0이면 뒤로가기한것
 		return userChoice;
+	}
+	public void playInfoViewerWithTwoId(int movieId,int screenId) {
+		for(PlayInfoDTO p:playInfoController.selectAllByScreenId(screenId)) {
+			if(p.getMovieId()==movieId) {
+				printList(screenId);
+			}
+		}
+	}
+	public void pickPlayInfo(int movieId,int theaterId) {
+		int playInfoChoice=ScUtil.nextInt(sc, "예매할 상영정보코드를 입력하거나 0을 입력해 뒤로가기");
+		PlayInfoDTO p=playInfoController.selectOne(playInfoChoice);
+		
+		while(playInfoChoice!=0&&(p==null||p.getMovieId()!=movieId||p.getTheaterId()!=theaterId)) {
+			System.out.println("잘못된 입력입니다.");
+			playInfoChoice=ScUtil.nextInt(sc, "예매할 상영정보코드를 입력하거나 0을 입력해 뒤로가기");
+		}
+		if(playInfoChoice!=0) {
+			if(p.getSeatLeft()==0) {
+				System.out.println("현재 잔여좌석이 없습니다.");
+			} else {
+				reservationViewer.setLogIn(logInInfo);
+				reservationViewer.checkValidAndGoOn(p.getId());
+			}
+		}
+	}
+	public void minusSeatLeft(int playInfoId) {
+		PlayInfoDTO p=playInfoController.selectOne(playInfoId);
+		int seatLeft=p.getSeatLeft();
+		
+		p.setSeatLeft(seatLeft-1);
+		
+		playInfoController.update(p);
+	}
+	public void plusSeatLeft(int playInfoId) {
+		PlayInfoDTO p=playInfoController.selectOne(playInfoId);
+		int seatLeft=p.getSeatLeft();
+		
+		p.setSeatLeft(seatLeft+1);
+		
+		playInfoController.update(p);
+	}
+	public void printReservedOne(int reservationId,int playInfoId) {
+		for(PlayInfoDTO p:playInfoController.selectAll()) {
+			if(p.getId()==playInfoId) {
+				System.out.printf("예매코드:%d 영화:",reservationId);
+				movieViewer.printMovieIdToTitle(p.getMovieId());
+				System.out.printf(" 극장:");
+				theaterViewer.printTheaterIdToName(p.getTheaterId());
+				System.out.printf(" 상영관코드:%d\n",p.getScreenId());
+			}
+		}
 	}
 }

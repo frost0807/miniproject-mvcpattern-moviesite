@@ -10,8 +10,6 @@ public class UserController {
 	public UserController() {
 		uList=new ArrayList<>();
 		nextId=1;
-		
-		
 	}
 	public UserDTO selectOne(int id) {
 		UserDTO temp=new UserDTO(id);
@@ -42,6 +40,12 @@ public class UserController {
 	public void insert(UserDTO u) {
 		u.setId(nextId++);
 		uList.add(u);
+	}
+	public void delete(int userId) {
+		uList.remove(new UserDTO(userId));
+	}
+	public void update(UserDTO u) {
+		uList.set(uList.indexOf(u), u);
 	}
 	public boolean checkValidId(String tempUserName) {
 		for(UserDTO u:uList) {
